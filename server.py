@@ -18,8 +18,8 @@ class Battlesnake(object):
             'apiversion': '1',
             'author': 'Alexander Stoichov',
             'color': '#ff9225',
-            'head': 'default',  # TODO: Personalize
-            'tail': 'default',  # TODO: Personalize
+            'head': 'gamer',
+            'tail': 'mouse',
         }
 
     @cherrypy.expose
