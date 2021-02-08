@@ -48,11 +48,7 @@ class Battlesnake(object):
 
         food = board.get('food')
 
-        my_snake = None
-        for snake in board.get('snakes'):
-            if snake.get('name') == 'Alexander Stoichkov':
-                my_snake = snake
-                break
+        my_snake = data.get('you')
 
         head = my_snake.get('head')
         body = my_snake.get('body')
@@ -60,8 +56,13 @@ class Battlesnake(object):
         # pprint.pprint(my_snake)
         # possible_moves = ['up', 'down', 'left', 'right']
 
+        '''
+        Run in circle counterclockwise
+        AND hopefully it won't crash 
+        with other snakes on the board
+        '''
+
         move = 'up'
-        print(head)
 
         if head == {'x': 0, 'y': 0}:
             move = 'right'
