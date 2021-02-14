@@ -1,4 +1,4 @@
-import os
+import os, random
 
 import cherrypy
 '''
@@ -8,6 +8,30 @@ For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python
 
 
 class Battlesnake(object):
+    def get_bad_positions(self, board):
+        bad_positions = []
+
+        for x in range(board['width']):
+            bad_positions.append({'x': x, 'y': -1})
+            bad_positions.append({'x': x, 'y': (board['height']-1)})
+        for y in range(board['height']):
+            bad_positions.append({'x': -1, 'y': y})
+            bad_positions.append({'x': (board['width']-1), 'y': y})
+
+        for snake in board['snakes']:
+            for position in snake['body']:
+                bad_positions.append(position)
+
+        return bad_positions
+
+    def get_next_moves(self, curr_position):
+        return {
+            'up': {'x': curr_position['x'], 'y': (curr_position['y']+1)},
+            'down': {'x': curr_position['x'], 'y': (curr_position['y']-1)},
+            'left': {'x': (curr_position['x']-1), 'y': curr_position['y']},
+            'right': {'x': (curr_position['x']+1), 'y': curr_position['y']},
+        }
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def index(self):
@@ -41,47 +65,31 @@ class Battlesnake(object):
         # TODO: Use the information in cherrypy.request.json to decide your next move.
         data = cherrypy.request.json
 
-        board = data.get('board')
+        board = data['board']
 
-        width = board.get('width')
-        height = board.get('height')
+        my_snake = data['you']
+        head = my_snake['head']
 
-        food = board.get('food')
+        next_moves = self.get_next_moves(head)
 
-        my_snake = data.get('you')
+        for next_move, position in next_moves.items():
+            if position in board['food']:
+                return {'move': next_move}
 
-        head = my_snake.get('head')
-        body = my_snake.get('body')
+        possible_moves = ['up', 'down', 'left', 'right']
+        next_move = random.choice(possible_moves)
 
-        # pprint.pprint(my_snake)
-        # possible_moves = ['up', 'down', 'left', 'right']
+        bad_positions = self.get_bad_positions(board)
 
-        '''
-        Run in circle counterclockwise
-        AND hopefully it won't crash 
-        with other snakes on the board
-        '''
-
-        move = 'up'
-
-        if head == {'x': 0, 'y': 0}:
-            move = 'right'
-        elif head == {'x': (width - 1), 'y': 0}:
-            move = 'up'
-        elif head == {'x': (width - 1), 'y': (height - 1)}:
-            move = 'left'
-        elif head == {'x': 0, 'y': (height - 1)}:
-            move = 'down'
+        print(f'MOVE: {next_move}')
+        if next_moves[next_move] not in bad_positions:
+            return {'move': next_move}
         else:
-            if head.get('y') == (height - 1): move = 'left'
-            if head.get('x') == 0: move = 'down'
-            if head.get('y') == 0: move = 'right'
-            if head.get('x') == (width - 1): move = 'up'
-
-        print(f'MOVE: {move}')
-        return {'move': move}
+            print(next_moves[next_move] in bad_positions)
+            return self.move()
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
     @cherrypy.tools.json_in()
     def end(self):
         # This function is called when a game your snake was in ends.
