@@ -8,7 +8,7 @@
   AND hopefully it won't crash 
   with other snakes on the board
 
-    #wall_hugger
+  #wall_hugger
   '''
 ```
 
