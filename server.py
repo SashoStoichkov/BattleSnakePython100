@@ -13,10 +13,10 @@ class Battlesnake(object):
 
         for x in range(board['width']):
             bad_positions.append({'x': x, 'y': -1})
-            bad_positions.append({'x': x, 'y': (board['height']-1)})
+            bad_positions.append({'x': x, 'y': (board['height'])})
         for y in range(board['height']):
             bad_positions.append({'x': -1, 'y': y})
-            bad_positions.append({'x': (board['width']-1), 'y': y})
+            bad_positions.append({'x': (board['width']), 'y': y})
 
         for snake in board['snakes']:
             for position in snake['body']:
@@ -26,10 +26,22 @@ class Battlesnake(object):
 
     def get_next_moves(self, curr_position):
         return {
-            'up': {'x': curr_position['x'], 'y': (curr_position['y']+1)},
-            'down': {'x': curr_position['x'], 'y': (curr_position['y']-1)},
-            'left': {'x': (curr_position['x']-1), 'y': curr_position['y']},
-            'right': {'x': (curr_position['x']+1), 'y': curr_position['y']},
+            'up': {
+                'x': curr_position['x'],
+                'y': (curr_position['y'] + 1)
+            },
+            'down': {
+                'x': curr_position['x'],
+                'y': (curr_position['y'] - 1)
+            },
+            'left': {
+                'x': (curr_position['x'] - 1),
+                'y': curr_position['y']
+            },
+            'right': {
+                'x': (curr_position['x'] + 1),
+                'y': curr_position['y']
+            },
         }
 
     @cherrypy.expose
@@ -67,10 +79,7 @@ class Battlesnake(object):
 
         board = data['board']
 
-        my_snake = data['you']
-        head = my_snake['head']
-
-        next_moves = self.get_next_moves(head)
+        next_moves = self.get_next_moves(data['you']['head'])
 
         for next_move, position in next_moves.items():
             if position in board['food']:
