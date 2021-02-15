@@ -2,6 +2,7 @@
 
 ```python
   '''
+  V1.0
   Run in circle counterclockwise
   AND hopefully it won't crash 
   with other snakes on the board
