@@ -48,7 +48,9 @@ class Battlesnake(object):
         next_moves = big_brain.get_next_moves(data['you']['head'])
 
         for next_move, position in next_moves.items():
-            if position in board['food']:
+            if position in board['food'] and \
+               big_brain.not_a_hole(me, position) and \
+               big_brain.not_next_to_a_head(me, board, position):
                 return {'move': next_move}
 
         possible_moves = ['up', 'down', 'left', 'right']
