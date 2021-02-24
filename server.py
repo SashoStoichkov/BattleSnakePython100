@@ -1,4 +1,4 @@
-import os, random
+import os, random, copy
 
 import cherrypy
 '''
@@ -7,6 +7,8 @@ For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python
 '''
 
 import big_brain
+
+MOVES = ['up', 'down', 'left', 'right']
 
 
 class Battlesnake(object):
@@ -37,36 +39,43 @@ class Battlesnake(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
-    def move(self):
+    def move(self, possible_moves=MOVES):
         # This function is called on every turn of a game. It's how your snake decides where to move.
         # Valid moves are 'up', 'down', 'left', or 'right'.
-        data = cherrypy.request.json
 
-        me = data['you']
-        board = data['board']
+        if len(possible_moves) > 0:
+            data = cherrypy.request.json
 
-        next_moves = big_brain.get_next_moves(data['you']['head'])
+            me = data['you']
+            board = data['board']
 
-        for next_move, position in next_moves.items():
-            if position in board['food'] and \
-               big_brain.not_a_hole(me, position) and \
-               big_brain.not_next_to_a_head(me, board, position):
+            next_moves = big_brain.get_next_moves(data['you']['head'])
+
+            for next_move, position in next_moves.items():
+                if position in board['food'] and \
+                big_brain.not_a_hole(me, position) and \
+                big_brain.not_next_to_a_head(me, board, position):
+                    return {'move': next_move}
+
+            next_move = random.choice(possible_moves)
+
+            next_position = next_moves[next_move]
+            bad_positions = big_brain.get_bad_positions(board)
+
+            print(f'MOVE: {next_move}')
+            if next_position not in bad_positions and \
+            big_brain.not_a_hole(me, next_position) and \
+            big_brain.not_next_to_a_head(me, board, next_position):
                 return {'move': next_move}
+            else:
+                print('Panik!!!!!!!!') # It's not `panic` because of the meme :)
 
-        possible_moves = ['up', 'down', 'left', 'right']
-        next_move = random.choice(possible_moves)
+                safe_moves = copy.deepcopy(possible_moves)
+                safe_moves.remove(next_move)
 
-        next_position = next_moves[next_move]
-        bad_positions = big_brain.get_bad_positions(board)
-
-        print(f'MOVE: {next_move}')
-        if next_position not in bad_positions and \
-           big_brain.not_a_hole(me, next_position) and \
-           big_brain.not_next_to_a_head(me, board, next_position):
-            return {'move': next_move}
+                return self.move(safe_moves)
         else:
-            print('Panik!!!!!!!!')
-            return self.move()
+            print('That\'s all Folks!')
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
