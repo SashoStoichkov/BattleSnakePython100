@@ -6,44 +6,10 @@ This is a simple Battlesnake server written in Python.
 For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python/README.md
 '''
 
+import big_brain
+
 
 class Battlesnake(object):
-    def get_bad_positions(self, board):
-        bad_positions = []
-
-        for x in range(board['width']):
-            bad_positions.append({'x': x, 'y': -1})
-            bad_positions.append({'x': x, 'y': (board['height'])})
-        for y in range(board['height']):
-            bad_positions.append({'x': -1, 'y': y})
-            bad_positions.append({'x': (board['width']), 'y': y})
-
-        for snake in board['snakes']:
-            for position in snake['body']:
-                bad_positions.append(position)
-
-        return bad_positions
-
-    def get_next_moves(self, curr_position):
-        return {
-            'up': {
-                'x': curr_position['x'],
-                'y': (curr_position['y'] + 1)
-            },
-            'down': {
-                'x': curr_position['x'],
-                'y': (curr_position['y'] - 1)
-            },
-            'left': {
-                'x': (curr_position['x'] - 1),
-                'y': curr_position['y']
-            },
-            'right': {
-                'x': (curr_position['x'] + 1),
-                'y': curr_position['y']
-            },
-        }
-
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def index(self):
@@ -74,12 +40,12 @@ class Battlesnake(object):
     def move(self):
         # This function is called on every turn of a game. It's how your snake decides where to move.
         # Valid moves are 'up', 'down', 'left', or 'right'.
-        # TODO: Use the information in cherrypy.request.json to decide your next move.
         data = cherrypy.request.json
 
+        me = data['you']
         board = data['board']
 
-        next_moves = self.get_next_moves(data['you']['head'])
+        next_moves = big_brain.get_next_moves(data['you']['head'])
 
         for next_move, position in next_moves.items():
             if position in board['food']:
@@ -88,13 +54,16 @@ class Battlesnake(object):
         possible_moves = ['up', 'down', 'left', 'right']
         next_move = random.choice(possible_moves)
 
-        bad_positions = self.get_bad_positions(board)
+        next_position = next_moves[next_move]
+        bad_positions = big_brain.get_bad_positions(board)
 
         print(f'MOVE: {next_move}')
-        if next_moves[next_move] not in bad_positions:
+        if next_position not in bad_positions and \
+           big_brain.not_a_hole(me, next_position) and \
+           big_brain.not_next_to_a_head(me, board, next_position):
             return {'move': next_move}
         else:
-            print(next_moves[next_move] in bad_positions)
+            print('Panik!!!!!!!!')
             return self.move()
 
     @cherrypy.expose
