@@ -12,6 +12,9 @@ def get_bad_positions(board):
         for position in snake['body']:
             bad_positions.append(position)
 
+    for hazard in board['hazards']:
+        bad_positions.append(hazard)
+
     return bad_positions
 
 def get_next_moves(curr_position):

@@ -50,17 +50,17 @@ class Battlesnake(object):
             board = data['board']
 
             next_moves = big_brain.get_next_moves(data['you']['head'])
+            bad_positions = big_brain.get_bad_positions(board)
 
             for next_move, position in next_moves.items():
                 if position in board['food'] and \
-                big_brain.not_a_hole(me, position) and \
-                big_brain.not_next_to_a_head(me, board, position):
+                   big_brain.not_a_hole(me, position) and \
+                   big_brain.not_next_to_a_head(me, board, position) and \
+                   position not in bad_positions:
                     return {'move': next_move}
 
             next_move = random.choice(possible_moves)
-
             next_position = next_moves[next_move]
-            bad_positions = big_brain.get_bad_positions(board)
 
             print(f'MOVE: {next_move}')
             if next_position not in bad_positions and \
